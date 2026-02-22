@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { getDbData } from '@/lib/db';
 import fs from 'fs/promises';
 import path from 'path';
@@ -29,8 +29,9 @@ export async function POST(request: Request) {
 
         // Try to save to Supabase
         let supabaseSuccess = false;
-        if (supabase) {
-            const { error } = await supabase
+        const dbClient = supabaseAdmin || supabase;
+        if (dbClient) {
+            const { error } = await dbClient
                 .from(TABLE_NAME)
                 .upsert({ id: 1, data: body });
 
