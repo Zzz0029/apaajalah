@@ -19,7 +19,7 @@
     {
       "id": "1771765415251",
       "title": "test",
-      "category": "Vulnerability Disclosure Program",
+      "category": "CTF",
       "year": "2026",
       "image": "/uploads/1771765433952-nasa.jpg"
     }
@@ -33,9 +33,24 @@
       "Web Penetrasi",
       "Bug Hunter",
       "CTF",
-      "Cyber Security Enthusiast"
+      "Cyber Security Enthusiast",
+      "VDP",
+      "CCTF"
     ],
-    "bioBlocks": []
+    "bioBlocks": [
+      {
+        "id": "1771767676622",
+        "text": "Cyber Security Enthusiast | Bug Bounty Hunter | CO Phoenixcysec.id\n",
+        "textSize": "large",
+        "textColor": "gray"
+      },
+      {
+        "id": "1771767702403",
+        "text": "​Berfokus pada Vulnerability Research dan pengamanan aplikasi web. Saya percaya bahwa keamanan siber adalah proses berkelanjutan yang membutuhkan ketelitian dan dedikasi.",
+        "textSize": "normal",
+        "textColor": "gray"
+      }
+    ]
   },
   "faqs": [
     {

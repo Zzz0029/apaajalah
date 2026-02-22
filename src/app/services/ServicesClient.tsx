@@ -11,16 +11,12 @@ const services = [
         desc: "Rigorous offensive testing to break into systems before malicious actors do. Covering web apps, networks, and APIs.",
     },
     {
-        title: "Vulnerability Assessment",
-        desc: "Systematic review of security weaknesses. Automated and manual scanning combined for maximum coverage.",
+        title: "Cyber Security Enthusiast",
+        desc: "Continuously learning and exploring the latest in security research, vulnerability disclosure, and digital defense strategies.",
     },
     {
-        title: "Smart Contract Audit",
-        desc: "Deep source code review of Web3 protocols, ensuring logic flaws and reentrancy bugs are eliminated.",
-    },
-    {
-        title: "Secure Code Review",
-        desc: "Collaborating with dev teams directly to enforce security standards at the code level, minimizing risks early.",
+        title: "CTF",
+        desc: "Actively participating in Capture The Flag competitions to hone practical exploitation and defensive skills in real-world scenarios.",
     }
 ];
 
