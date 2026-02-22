@@ -53,7 +53,7 @@ export default function HomeClient({ dbData }: { dbData: DbSchema }) {
           <AboutSection profile={dbData.profile} />
 
           <InfiniteMarquee
-            items={["PENETRATION TESTING", "BUG EXPLORATION", "SMART CONTRACT AUDIT", "SECURE DEVELOPMENT"]}
+            items={["PENETRATION TESTING", "BUG EXPLORATION", "VULNERABILITY RESEARCH", "SECURE DEVELOPMENT"]}
             direction="left"
             speed="normal"
           />
@@ -70,7 +70,7 @@ export default function HomeClient({ dbData }: { dbData: DbSchema }) {
           />
 
           <InfiniteMarquee
-            items={["VULNERABILITY ASSESSMENT", "ZERO-DAY RESEARCH", "RED TEAMING", "WEB3 SECURITY"]}
+            items={["VULNERABILITY ASSESSMENT", "ZERO-DAY RESEARCH", "RED TEAMING", "THREAT MODELING"]}
             direction="right"
             speed="fast"
           />
