@@ -67,6 +67,39 @@ export interface DbSchema {
     faqs: FaqEntry[];
 }
 
+const defaultDb: DbSchema = {
+    profile: {
+        name: "Riski Permana",
+        role: "Cyber Security Consultant & Web Developer",
+        statementTitle: "Securing the Future, Building the Web.",
+        statementDesc: "I help organizations secure their critical assets while crafting high-end, dynamic web experiences.",
+        quote: "Security is not a product, but a process.",
+        bioText: "Creative Developer & Security Researcher based in Indonesia."
+    },
+    contact: {
+        email: "",
+        whatsapp: "",
+        whatsappLink: "",
+        linkedin: "",
+        instagram: ""
+    },
+    certifications: [],
+    hallOfFame: [],
+    about: {
+        title: "Behind\nThe Entity",
+        subtitle: "Core Capabilities",
+        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop",
+        capabilities: ["Web Penetrasi", "Bug Hunter", "CTF", "Cyber Security Enthusiast"],
+        bioBlocks: []
+    },
+    faqs: [
+        {
+            q: "Do you take on freelance Web Development projects?",
+            a: "Yes. In addition to security audits, I specialize in crafting high-end, Awwwards-winning websites using Next.js and Motion."
+        }
+    ]
+};
+
 export async function getDbData(): Promise<DbSchema> {
     // Try Supabase first
     try {
@@ -77,8 +110,13 @@ export async function getDbData(): Promise<DbSchema> {
                 .eq('id', 1)
                 .single();
 
-            if (!error && data) {
-                return data.data as DbSchema;
+            if (!error && data && data.data) {
+                const dbData = data.data as Partial<DbSchema>;
+                // If it's empty {} like from setup script, use defaultDb
+                if (!dbData.profile) {
+                    return defaultDb;
+                }
+                return { ...defaultDb, ...dbData } as DbSchema;
             }
             if (error) console.warn("Supabase fetch error, falling back to local:", error.message);
         }
@@ -90,46 +128,15 @@ export async function getDbData(): Promise<DbSchema> {
     const dataFilePath = path.join(process.cwd(), 'data', 'db.json');
     try {
         const fileContent = await fs.readFile(dataFilePath, 'utf8');
-        const db = JSON.parse(fileContent);
-        return db as DbSchema;
+        const dbData = JSON.parse(fileContent) as Partial<DbSchema>;
+        if (!dbData.profile) {
+            return defaultDb;
+        }
+        return { ...defaultDb, ...dbData } as DbSchema;
     } catch (error: any) {
-        // If file doesn't exist (ENOENT), just return default data without erroring out
         if (error.code !== 'ENOENT') {
             console.error("Failed to read local database:", error);
         }
-
-        const db = {
-            profile: {
-                name: "Riski Permana",
-                role: "Cyber Security Consultant & Web Developer",
-                statementTitle: "Securing the Future, Building the Web.",
-                statementDesc: "I help organizations secure their critical assets while crafting high-end, dynamic web experiences.",
-                quote: "Security is not a product, but a process.",
-                bioText: "Creative Developer & Security Researcher based in Indonesia."
-            },
-            contact: {
-                email: "",
-                whatsapp: "",
-                whatsappLink: "",
-                linkedin: "",
-                instagram: ""
-            },
-            certifications: [],
-            hallOfFame: [],
-            about: {
-                title: "Behind\nThe Entity",
-                subtitle: "Core Capabilities",
-                image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop",
-                capabilities: ["Web Penetrasi", "Bug Hunter", "CTF", "Cyber Security Enthusiast"],
-                bioBlocks: []
-            },
-            faqs: [
-                {
-                    q: "Do you take on freelance Web Development projects?",
-                    a: "Yes. In addition to security audits, I specialize in crafting high-end, Awwwards-winning websites using Next.js and Motion."
-                }
-            ]
-        };
-        return db;
+        return defaultDb;
     }
 }
