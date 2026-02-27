@@ -7,6 +7,16 @@ import path from 'path';
 const TABLE_NAME = 'portfolio_data';
 const dataFilePath = path.join(process.cwd(), 'data', 'db.json');
 
+export const maxDuration = 60; // increase timeout limits 
+
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '50mb', // Handle large Base64 encodings
+        },
+    },
+};
+
 export async function GET() {
     try {
         const data = await getDbData();

@@ -70,10 +70,15 @@ export default function AdminDashboard() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             });
-            const responseData = await res.json();
-
-            if (res.ok) alert(responseData.message || "Data saved successfully!");
-            else alert(`Failed to save data: ${responseData.error || "Unknown error"}`);
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const responseData = await res.json();
+                if (res.ok) alert(responseData.message || "Data saved successfully!");
+                else alert(`Failed to save data: ${responseData.error || "Unknown error"}`);
+            } else {
+                const textText = await res.text();
+                alert(`Server returned non-JSON error (Status ${res.status}): ${textText.substring(0, 50)}...`);
+            }
         } catch (e: any) {
             alert(`Error saving data: ${e.message}`);
         } finally {
