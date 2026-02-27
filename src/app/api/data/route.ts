@@ -57,14 +57,13 @@ export async function POST(request: Request) {
                 return NextResponse.json({ success: true, message: 'Data saved to local backup (Supabase unavailable)' });
             }
         } catch (fsError: any) {
-            console.warn("Could not save to local filesystem (expected in Vercel):", fsError.message);
+            console.warn("Could not save to local filesystem:", fsError.message);
 
             if (supabaseSuccess) {
                 return NextResponse.json({ success: true, message: 'Data saved to Supabase (local backup skipped)' });
             } else {
-                // If both Supabase and local save fail (common in Vercel without Supabase), 
-                // return success anyway so the UI doesn't show a generic error to the user during demo mode
-                return NextResponse.json({ success: true, message: 'Simulated save success (Storage unavailable)' });
+                // Return a strict error so the user knows
+                return NextResponse.json({ error: 'Supabase storage failed AND local fallback failed. Please run setup.sql in Supabase.' }, { status: 500 });
             }
         }
     } catch (error) {

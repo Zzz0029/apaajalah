@@ -70,10 +70,12 @@ export default function AdminDashboard() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             });
-            if (res.ok) alert("Data saved successfully!");
-            else alert("Failed to save data.");
-        } catch (e) {
-            alert("Error saving data.");
+            const responseData = await res.json();
+
+            if (res.ok) alert(responseData.message || "Data saved successfully!");
+            else alert(`Failed to save data: ${responseData.error || "Unknown error"}`);
+        } catch (e: any) {
+            alert(`Error saving data: ${e.message}`);
         } finally {
             setIsSaving(false);
         }
