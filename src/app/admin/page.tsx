@@ -24,8 +24,9 @@ const compressImage = (file: File): Promise<string> => {
             let width = img.width;
             let height = img.height;
 
-            // Limit to 800px instead of 1920px to prevent 4.5MB Vercel 413 Payload Errors
-            const MAX_DIM = 800;
+            // Limit to extremely aggressive 400px (Thumbnail size) to prevent 4.5MB Vercel Serverless Function Limits
+            // Since all certificates save together in one giant JSON object, every byte matters heavily.
+            const MAX_DIM = 400;
             if (width > height && width > MAX_DIM) {
                 height *= MAX_DIM / width;
                 width = MAX_DIM;
@@ -39,8 +40,8 @@ const compressImage = (file: File): Promise<string> => {
             const ctx = canvas.getContext("2d");
             if (ctx) ctx.drawImage(img, 0, 0, width, height);
 
-            // Output webp format at 60% quality which is much smaller than jpeg
-            resolve(canvas.toDataURL("image/webp", 0.6));
+            // Output webp format at extremely low 40% quality. For thumbnails, it looks completely fine visually but saves massive space.
+            resolve(canvas.toDataURL("image/webp", 0.4));
         };
         img.onerror = error => reject(error);
     });
@@ -69,11 +70,24 @@ export default function AdminDashboard() {
     const handleSave = async () => {
         if (!data) return;
         setIsSaving(true);
+        let payload: any = {};
+        if (activeTab === "home") {
+            payload = { profile: data.profile };
+        } else if (activeTab === "about") {
+            payload = { about: data.about };
+        } else if (activeTab === "certifications") {
+            payload = { certifications: data.certifications };
+        } else if (activeTab === "hallOfFame") {
+            payload = { hallOfFame: data.hallOfFame };
+        } else if (activeTab === "contact") {
+            payload = { contact: data.contact, faqs: data.faqs };
+        }
+
         try {
             const res = await fetch("/api/data", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
+                body: JSON.stringify(payload)
             });
             const contentType = res.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {

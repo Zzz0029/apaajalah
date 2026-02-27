@@ -35,7 +35,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await request.json();
+        const partialBody = await request.json();
+
+        // Fetch current data from database to perform a granular deep merge.
+        // This allows the front-end to send *only* the specific section that changed (e.g., Certifications)
+        // rather than the entire 4MB+ JSON payload at once, dodging Vercel Serverless Function 413 limits entirely.
+        const currentData = await getDbData();
+
+        const mergedData = {
+            ...currentData,
+            ...partialBody
+        };
 
         // Try to save to Supabase
         let supabaseSuccess = false;
@@ -43,7 +53,7 @@ export async function POST(request: Request) {
         if (dbClient) {
             const { error } = await dbClient
                 .from(TABLE_NAME)
-                .upsert({ id: 1, data: body });
+                .upsert({ id: 1, data: mergedData });
 
             if (!error) {
                 supabaseSuccess = true;
@@ -59,7 +69,7 @@ export async function POST(request: Request) {
             const dataDir = path.dirname(dataFilePath);
             await fs.mkdir(dataDir, { recursive: true });
 
-            await fs.writeFile(dataFilePath, JSON.stringify(body, null, 2), 'utf8');
+            await fs.writeFile(dataFilePath, JSON.stringify(mergedData, null, 2), 'utf8');
 
             if (supabaseSuccess) {
                 return NextResponse.json({ success: true, message: 'Data saved to Supabase and local backup' });
