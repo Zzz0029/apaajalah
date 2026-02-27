@@ -23,7 +23,7 @@ export default function CertificationsClient({ dbData }: { dbData: DbSchema }) {
 
                 <div className="columns-1 md:columns-2 lg:columns-3 gap-8 md:gap-12 [column-fill:_balance]">
                     {dbData.certifications.map((project, idx) => {
-                        const isPdf = project.image.toLowerCase().endsWith(".pdf");
+                        const isPdf = project.image.startsWith("data:application/pdf") || project.image.toLowerCase().split('?')[0].endsWith(".pdf");
 
                         return (
                             <motion.div

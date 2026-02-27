@@ -5,6 +5,42 @@ import { DbSchema } from "@/lib/db";
 import { LogOut, Save, RefreshCw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        if (file.type === "application/pdf") {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+            return;
+        }
+
+        const img = new window.Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.src = objectUrl;
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+            const MAX_DIM = 1920;
+            if (width > height && width > MAX_DIM) {
+                height *= MAX_DIM / width;
+                width = MAX_DIM;
+            } else if (height > MAX_DIM) {
+                width *= MAX_DIM / height;
+                height = MAX_DIM;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (ctx) ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", 0.8));
+        };
+        img.onerror = error => reject(error);
+    });
+};
+
 export default function AdminDashboard() {
     const [data, setData] = useState<DbSchema | null>(null);
     const [activeTab, setActiveTab] = useState<"home" | "about" | "certifications" | "hallOfFame" | "contact">("home");
@@ -347,21 +383,14 @@ export default function AdminDashboard() {
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;
                                                         setIsSaving(true);
-                                                        const formData = new FormData();
-                                                        formData.append("file", file);
-                                                        formData.append("folder", "about");
                                                         try {
-                                                            const res = await fetch("/api/upload", { method: "POST", body: formData });
-                                                            const result = await res.json();
-                                                            if (res.ok) {
-                                                                setData({ ...data, about: { ...data.about, image: result.url } });
-                                                            } else {
-                                                                alert(`Upload failed: ${result.error || "Unknown error"}`);
-                                                            }
+                                                            const base64Url = await compressImage(file);
+                                                            setData({ ...data, about: { ...data.about, image: base64Url } });
                                                         } catch (err) {
-                                                            alert("Error uploading file.");
+                                                            alert("Error processing file.");
                                                         } finally {
                                                             setIsSaving(false);
+                                                            e.target.value = '';
                                                         }
                                                     }}
                                                 />
@@ -603,27 +632,18 @@ export default function AdminDashboard() {
                                                                 const file = e.target.files?.[0];
                                                                 if (!file) return;
 
-                                                                // PDF handling skips cropping
                                                                 setIsSaving(true);
-                                                                const formData = new FormData();
-                                                                formData.append("file", file);
-                                                                formData.append("folder", "certificates");
                                                                 try {
-                                                                    const res = await fetch("/api/upload", { method: "POST", body: formData });
-                                                                    const result = await res.json();
-                                                                    if (res.ok) {
-                                                                        const newCerts = [...data.certifications];
-                                                                        newCerts[index].image = result.url;
-                                                                        setData({ ...data, certifications: newCerts });
-                                                                    } else {
-                                                                        alert(`Upload failed: ${result.error || "Unknown error"}`);
-                                                                    }
+                                                                    const base64Url = await compressImage(file);
+                                                                    const newCerts = [...data.certifications];
+                                                                    newCerts[index].image = base64Url;
+                                                                    setData({ ...data, certifications: newCerts });
                                                                 } catch (err) {
-                                                                    alert("Error uploading file.");
+                                                                    alert("Error processing file.");
                                                                 } finally {
                                                                     setIsSaving(false);
+                                                                    e.target.value = '';
                                                                 }
-                                                                e.target.value = '';
                                                             }}
                                                         />
                                                     </label>

@@ -60,7 +60,7 @@ export default function CertificationsSection({ certifications, hallOfFame }: { 
 
                 <div className="columns-1 md:columns-2 lg:columns-3 gap-8 md:gap-12 [column-fill:_balance]">
                     {certifications.map((cert, idx) => {
-                        const isPdf = cert.image.toLowerCase().split('?')[0].endsWith(".pdf");
+                        const isPdf = cert.image.includes("data:application/pdf") || cert.image.toLowerCase().split('?')[0].endsWith(".pdf");
                         return (
                             <motion.div
                                 key={cert.id}
