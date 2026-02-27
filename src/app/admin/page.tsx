@@ -23,7 +23,9 @@ const compressImage = (file: File): Promise<string> => {
             const canvas = document.createElement("canvas");
             let width = img.width;
             let height = img.height;
-            const MAX_DIM = 1920;
+
+            // Limit to 800px instead of 1920px to prevent 4.5MB Vercel 413 Payload Errors
+            const MAX_DIM = 800;
             if (width > height && width > MAX_DIM) {
                 height *= MAX_DIM / width;
                 width = MAX_DIM;
@@ -31,11 +33,14 @@ const compressImage = (file: File): Promise<string> => {
                 width *= MAX_DIM / height;
                 height = MAX_DIM;
             }
+
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext("2d");
             if (ctx) ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL("image/jpeg", 0.8));
+
+            // Output webp format at 60% quality which is much smaller than jpeg
+            resolve(canvas.toDataURL("image/webp", 0.6));
         };
         img.onerror = error => reject(error);
     });
