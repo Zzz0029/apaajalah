@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DbSchema } from "@/lib/db";
 import { LogOut, Save, RefreshCw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -84,20 +85,26 @@ export default function AdminDashboard() {
         }
 
         try {
-            const res = await fetch("/api/data", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            const contentType = res.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-                const responseData = await res.json();
-                if (res.ok) alert(responseData.message || "Data saved successfully!");
-                else alert(`Failed to save data: ${responseData.error || "Unknown error"}`);
-            } else {
-                const textText = await res.text();
-                alert(`Server returned non-JSON error (Status ${res.status}): ${textText.substring(0, 50)}...`);
+            // Completely BYPASS Vercel API limits (4.5MB) by sending data directly from browser to Supabase
+            if (!supabase) throw new Error("Supabase is not initialized on the client.");
+
+            // Fetch current data state globally to merge tab correctly 
+            const { data: dbData, error: dbErr } = await supabase.from('portfolio_data').select('data').eq('id', 1).single();
+            if (dbErr && dbErr.code !== 'PGRST116') { // PGRST116 is No Rows Found
+                console.error("Fetch DB error:", dbErr);
             }
+
+            const currentGlobalData = dbData?.data || data;
+            const mergedData = { ...currentGlobalData, ...payload };
+
+            const { error: upsertErr } = await supabase.from('portfolio_data').upsert({ id: 1, data: mergedData });
+
+            if (upsertErr) {
+                alert(`Supabase Direct Save Error: ${upsertErr.message}`);
+                return;
+            }
+
+            alert("Data saved successfully directly to Supabase!");
         } catch (e: any) {
             alert(`Error saving data: ${e.message}`);
         } finally {
